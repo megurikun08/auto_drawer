@@ -8,13 +8,14 @@ const int buttonPin = 9;
 
 // State definitions
 enum State {
+  STATE_0, // Initial state: All off
   IDLE_CLOSED,
   OPENING,
   IDLE_OPEN,
   CLOSING
 };
 
-State currentState = IDLE_CLOSED;
+State currentState = STATE_0; // Start in the initial state
 bool buttonPressed = false;
 
 unsigned long movementStartTime = 0;
@@ -27,12 +28,27 @@ void setup() {
   pinMode(redLED, OUTPUT);
   pinMode(buzzer, OUTPUT);
   pinMode(buttonPin, INPUT_PULLUP);
+
+  // Initialize all outputs to LOW in setup()
+  digitalWrite(dirPin, LOW);
+  digitalWrite(stepPin, LOW);
+  digitalWrite(greenLED, LOW);
+  digitalWrite(redLED, LOW);
+  digitalWrite(buzzer, LOW);
 }
 
 void loop() {
   checkButton();
 
   switch (currentState) {
+    case STATE_0: // New initial state
+      // All components are off, do nothing
+      if (buttonPressed) {
+        buttonPressed = false; // Consume the button press
+        currentState = IDLE_CLOSED; // Go to the IDLE_CLOSED state to begin operation
+      }
+      break;
+
     case IDLE_CLOSED:
       stopMotor();
       digitalWrite(redLED, LOW);
